@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { validateMongoId } = require('../utils/validateMongoId');
+const { publishProductEvent, publishInventoryEvent } = require('../events/productEvents');
 const fs = require('fs');
 const path = require('path');
 
@@ -230,6 +231,16 @@ const createProduct = asyncHandler(async (req, res) => {
           { $inc: { 'statistics.totalProducts': 1 } }
         );
       }
+
+      await publishProductEvent('product.created', {
+        productId: product._id,
+        name: product.name,
+        sku: product.sku,
+        companyId: product.companyId,
+        category: product.category,
+        inventory: product.inventory,
+        pricing: product.pricing
+      });
     } catch (error) {
       failedProducts.push({
         data: productData.name || 'Unknown',
@@ -309,6 +320,14 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   await product.save();
 
+  await publishProductEvent('product.updated', {
+    productId: product._id,
+    name: product.name,
+    sku: product.sku,
+    companyId: product.companyId,
+    updates: req.body
+  });
+
   res.status(200).json({
     success: true,
     message: 'Product updated successfully',
@@ -376,6 +395,13 @@ const deleteProduct = asyncHandler(async (req, res) => {
       { $inc: { 'statistics.totalProducts': -1 } }
     );
   }
+
+  await publishProductEvent('product.deleted', {
+    productId: id,
+    name: product.name,
+    sku: product.sku,
+    companyId: product.companyId
+  });
 
   res.status(200).json({
     success: true,
@@ -479,6 +505,20 @@ const updateInventory = asyncHandler(async (req, res) => {
 
   await product.save();
 
+  await publishInventoryEvent('inventory.updated', {
+    productId: id,
+    name: product.name,
+    sku: product.sku,
+    companyId: product.companyId,
+    warehouseId,
+    variationId,
+    oldQuantity,
+    newQuantity: product.inventory.quantity,
+    operation,
+    reason,
+    stockStatus: product.stockStatus
+  });
+
   // Trigger alert if low (use total quantity)
   if (product.inventory.quantity <= product.inventory.lowStockThreshold && operation === 'decrement') {
     const Alert = require('../models/Alert');
@@ -498,7 +538,7 @@ const updateInventory = asyncHandler(async (req, res) => {
     data: {
       id: product._id,
       oldQuantity,
-      newQuantity: product.inventory.quantity, // Use aggregated total
+      newQuantity: product.inventory.quantity,
       stockStatus: product.stockStatus
     }
   });
