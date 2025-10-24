@@ -1,0 +1,340 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ecommerce-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ecommerce-network
+
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      AUTH_SERVICE_URL: http://auth-service:8001
+      COMPANY_SERVICE_URL: http://company-service:8002
+      SHOP_SERVICE_URL: http://shop-service:8003
+      ECOMMERCE_SERVICE_URL: http://ecommerce-service:8004
+      SALES_SERVICE_URL: http://sales-service:8005
+      PAYMENT_SERVICE_URL: http://payment-service:8006
+      INVENTORY_SERVICE_URL: http://inventory-service:8007
+      NOTIFICATION_SERVICE_URL: http://notification-service:8008
+      WEBSOCKET_SERVICE_URL: http://websocket-service:8009
+      AUDIT_SERVICE_URL: http://audit-service:8010
+      ANALYTICS_SERVICE_URL: http://analytics-service:8011
+      DEBT_SERVICE_URL: http://debt-service:8012
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      PORT: 8001
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/authdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 7d
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/auth-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  company-service:
+    build: ./services/company-service
+    container_name: company-service
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      PORT: 8002
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/companydb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/company-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  shop-service:
+    build: ./services/shop-service
+    container_name: shop-service
+    restart: always
+    ports:
+      - "8003:8003"
+    environment:
+      PORT: 8003
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/shopdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/shop-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  ecommerce-service:
+    build: ./services/ecommerce-service
+    container_name: ecommerce-service
+    restart: always
+    ports:
+      - "8004:8004"
+    environment:
+      PORT: 8004
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/ecommercedb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/ecommerce-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  sales-service:
+    build: ./services/sales-service
+    container_name: sales-service
+    restart: always
+    ports:
+      - "8005:8005"
+    environment:
+      PORT: 8005
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/salesdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/sales-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment-service
+    restart: always
+    ports:
+      - "8006:8006"
+    environment:
+      PORT: 8006
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/paymentdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      STRIPE_SECRET_KEY: sk_test_your_stripe_key
+      PAYPAL_CLIENT_ID: your_paypal_client_id
+      PAYPAL_SECRET: your_paypal_secret
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/payment-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  inventory-service:
+    build: .
+    container_name: inventory-service
+    restart: always
+    ports:
+      - "8007:8007"
+    environment:
+      PORT: 8007
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/inventorydb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./src:/app/src
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    restart: always
+    ports:
+      - "8008:8008"
+    environment:
+      PORT: 8008
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/notificationdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: your_email@gmail.com
+      SMTP_PASS: your_app_password
+      SMS_PROVIDER_API_KEY: your_sms_api_key
+      FIREBASE_PROJECT_ID: your_firebase_project_id
+      FIREBASE_PRIVATE_KEY: your_firebase_private_key
+      FIREBASE_CLIENT_EMAIL: your_firebase_client_email
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/notification-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  websocket-service:
+    build: ./services/websocket-service
+    container_name: websocket-service
+    restart: always
+    ports:
+      - "8009:8009"
+    environment:
+      PORT: 8009
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/websocket-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  audit-service:
+    build: ./services/audit-service
+    container_name: audit-service
+    restart: always
+    ports:
+      - "8010:8010"
+    environment:
+      PORT: 8010
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/auditdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/audit-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    restart: always
+    ports:
+      - "8011:8011"
+    environment:
+      PORT: 8011
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/analyticsdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/analytics-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+  debt-service:
+    build: ./services/debt-service
+    container_name: debt-service
+    restart: always
+    ports:
+      - "8012:8012"
+    environment:
+      PORT: 8012
+      DB_MONGO: mongodb://admin:admin123@mongodb:27017/debtdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/debt-service:/app
+      - ./shared:/app/shared
+      - /app/node_modules
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge
