@@ -51,6 +51,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isPhoneVerified: {
+    type: Boolean,
+    default: false
+  },
+  pendingPhone: String,
+  phoneVerificationCode: String,
+  phoneVerificationExpires: Date,
   lastLogin: Date,
   refreshTokens: [{
     token: String,

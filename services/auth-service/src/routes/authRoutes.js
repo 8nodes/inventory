@@ -46,4 +46,66 @@ router.post('/change-password',
 
 router.get('/verify', authMiddleware, authController.verifyToken);
 
+router.post('/send-verification-email', authMiddleware, authController.sendVerificationEmail);
+
+router.get('/verify-email/:token', authController.verifyEmail);
+
+router.post('/send-phone-verification',
+  authMiddleware,
+  [
+    body('phone').notEmpty().isMobilePhone()
+  ],
+  authController.sendPhoneVerification
+);
+
+router.post('/verify-phone',
+  authMiddleware,
+  [
+    body('code').notEmpty().isLength({ min: 6, max: 6 })
+  ],
+  authController.verifyPhone
+);
+
+router.post('/forgot-password',
+  [
+    body('email').isEmail().normalizeEmail()
+  ],
+  authController.forgotPassword
+);
+
+router.post('/reset-password/:token',
+  [
+    body('newPassword').isLength({ min: 6 })
+  ],
+  authController.resetPassword
+);
+
+router.post('/2fa/enable', authMiddleware, authController.enable2FA);
+
+router.post('/2fa/verify',
+  authMiddleware,
+  [
+    body('token').notEmpty().isLength({ min: 6, max: 6 })
+  ],
+  authController.verify2FA
+);
+
+router.post('/2fa/disable',
+  authMiddleware,
+  [
+    body('token').notEmpty(),
+    body('password').notEmpty()
+  ],
+  authController.disable2FA
+);
+
+router.post('/2fa/validate',
+  [
+    body('email').isEmail().normalizeEmail(),
+    body('password').notEmpty(),
+    body('token').notEmpty().isLength({ min: 6, max: 6 })
+  ],
+  authController.validate2FA
+);
+
 module.exports = router;
