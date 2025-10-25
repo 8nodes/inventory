@@ -40,17 +40,18 @@ services:
       PORT: 8000
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       AUTH_SERVICE_URL: http://auth-service:8001
-      COMPANY_SERVICE_URL: http://company-service:8002
+      COMPANY_SERVICE_URL: http://company-service:8009
       SHOP_SERVICE_URL: http://shop-service:8003
       ECOMMERCE_SERVICE_URL: http://ecommerce-service:8004
       SALES_SERVICE_URL: http://sales-service:8005
       PAYMENT_SERVICE_URL: http://payment-service:8006
       INVENTORY_SERVICE_URL: http://inventory-service:8007
-      NOTIFICATION_SERVICE_URL: http://notification-service:8008
-      WEBSOCKET_SERVICE_URL: http://websocket-service:8009
-      AUDIT_SERVICE_URL: http://audit-service:8010
-      ANALYTICS_SERVICE_URL: http://analytics-service:8011
-      DEBT_SERVICE_URL: http://debt-service:8012
+      CHAT_SERVICE_URL: http://chat-service:8008
+      NOTIFICATION_SERVICE_URL: http://notification-service:8010
+      WEBSOCKET_SERVICE_URL: http://websocket-service:8011
+      AUDIT_SERVICE_URL: http://audit-service:8012
+      ANALYTICS_SERVICE_URL: http://analytics-service:8013
+      DEBT_SERVICE_URL: http://debt-service:8014
     depends_on:
       - mongodb
       - rabbitmq
@@ -85,21 +86,18 @@ services:
     container_name: company-service
     restart: always
     ports:
-      - "8002:8002"
+      - "8009:8009"
     environment:
-      PORT: 8002
-      DB_MONGO: mongodb://admin:admin123@mongodb:27017/companydb?authSource=admin
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      PORT: 8009
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/companydb?authSource=admin
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       NODE_ENV: development
     depends_on:
       - mongodb
-      - rabbitmq
     networks:
       - ecommerce-network
     volumes:
       - ./services/company-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
   shop-service:
@@ -194,14 +192,14 @@ services:
       - /app/node_modules
 
   inventory-service:
-    build: .
+    build: ./services/inventory-service
     container_name: inventory-service
     restart: always
     ports:
       - "8007:8007"
     environment:
       PORT: 8007
-      DB_MONGO: mongodb://admin:admin123@mongodb:27017/inventorydb?authSource=admin
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/inventorydb?authSource=admin
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       NODE_ENV: development
@@ -211,8 +209,28 @@ services:
     networks:
       - ecommerce-network
     volumes:
-      - ./src:/app/src
-      - ./shared:/app/shared
+      - ./services/inventory-service:/app
+      - /app/node_modules
+
+  chat-service:
+    build: ./services/chat-service
+    container_name: chat-service
+    restart: always
+    ports:
+      - "8008:8008"
+    environment:
+      PORT: 8008
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/chatdb?authSource=admin
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/chat-service:/app
       - /app/node_modules
 
   notification-service:
@@ -220,9 +238,9 @@ services:
     container_name: notification-service
     restart: always
     ports:
-      - "8008:8008"
+      - "8010:8010"
     environment:
-      PORT: 8008
+      PORT: 8010
       DB_MONGO: mongodb://admin:admin123@mongodb:27017/notificationdb?authSource=admin
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
@@ -242,7 +260,6 @@ services:
       - ecommerce-network
     volumes:
       - ./services/notification-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
   websocket-service:
@@ -250,9 +267,9 @@ services:
     container_name: websocket-service
     restart: always
     ports:
-      - "8009:8009"
+      - "8011:8011"
     environment:
-      PORT: 8009
+      PORT: 8011
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       NODE_ENV: development
@@ -262,7 +279,6 @@ services:
       - ecommerce-network
     volumes:
       - ./services/websocket-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
   audit-service:
@@ -270,9 +286,9 @@ services:
     container_name: audit-service
     restart: always
     ports:
-      - "8010:8010"
+      - "8012:8012"
     environment:
-      PORT: 8010
+      PORT: 8012
       DB_MONGO: mongodb://admin:admin123@mongodb:27017/auditdb?authSource=admin
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
@@ -284,7 +300,6 @@ services:
       - ecommerce-network
     volumes:
       - ./services/audit-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
   analytics-service:
@@ -292,9 +307,9 @@ services:
     container_name: analytics-service
     restart: always
     ports:
-      - "8011:8011"
+      - "8013:8013"
     environment:
-      PORT: 8011
+      PORT: 8013
       DB_MONGO: mongodb://admin:admin123@mongodb:27017/analyticsdb?authSource=admin
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
@@ -306,7 +321,6 @@ services:
       - ecommerce-network
     volumes:
       - ./services/analytics-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
   debt-service:
@@ -314,9 +328,9 @@ services:
     container_name: debt-service
     restart: always
     ports:
-      - "8012:8012"
+      - "8014:8014"
     environment:
-      PORT: 8012
+      PORT: 8014
       DB_MONGO: mongodb://admin:admin123@mongodb:27017/debtdb?authSource=admin
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
@@ -328,7 +342,6 @@ services:
       - ecommerce-network
     volumes:
       - ./services/debt-service:/app
-      - ./shared:/app/shared
       - /app/node_modules
 
 volumes:
