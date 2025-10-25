@@ -39,15 +39,21 @@ function setupSocketIO(server) {
   io.on('connection', (socket) => {
     const userId = socket.user.userId;
     const userRole = socket.user.role;
+    const companyId = socket.user.companyId;
 
     logger.info(`User connected: ${userId} (${userRole})`);
 
-    connectedUsers.set(userId, socket.id);
+    connectedUsers.set(userId, {
+      socketId: socket.id,
+      userId,
+      companyId,
+      connectedAt: new Date()
+    });
 
     socket.join(`user:${userId}`);
 
-    if (socket.user.companyId) {
-      socket.join(`company:${socket.user.companyId}`);
+    if (companyId) {
+      socket.join(`company:${companyId}`);
     }
 
     if (socket.user.shopIds && socket.user.shopIds.length > 0) {
@@ -59,6 +65,130 @@ function setupSocketIO(server) {
     if (userRole === 'super_admin') {
       socket.join('super_admin');
     }
+
+    socket.on('join_chat_room', (roomId) => {
+      socket.join(`chat:${roomId}`);
+      const rooms = userRooms.get(userId) || [];
+      if (!rooms.includes(roomId)) {
+        rooms.push(roomId);
+        userRooms.set(userId, rooms);
+      }
+
+      socket.to(`chat:${roomId}`).emit('user_joined_room', {
+        userId,
+        roomId,
+        timestamp: new Date()
+      });
+
+      logger.info(`User ${userId} joined chat room: ${roomId}`);
+    });
+
+    socket.on('leave_chat_room', (roomId) => {
+      socket.leave(`chat:${roomId}`);
+      const rooms = userRooms.get(userId) || [];
+      const index = rooms.indexOf(roomId);
+      if (index > -1) {
+        rooms.splice(index, 1);
+        userRooms.set(userId, rooms);
+      }
+
+      socket.to(`chat:${roomId}`).emit('user_left_room', {
+        userId,
+        roomId,
+        timestamp: new Date()
+      });
+
+      logger.info(`User ${userId} left chat room: ${roomId}`);
+    });
+
+    socket.on('chat_message', (data) => {
+      const { roomId, messageId, content, messageType, metadata } = data;
+
+      socket.to(`chat:${roomId}`).emit('new_message', {
+        messageId,
+        roomId,
+        senderId: userId,
+        content,
+        messageType,
+        metadata,
+        timestamp: new Date()
+      });
+
+      logger.info(`User ${userId} sent message to room ${roomId}`);
+    });
+
+    socket.on('typing_indicator', ({ roomId, isTyping }) => {
+      socket.to(`chat:${roomId}`).emit('user_typing', {
+        userId,
+        roomId,
+        isTyping,
+        timestamp: new Date()
+      });
+    });
+
+    socket.on('message_read', ({ roomId, messageId }) => {
+      socket.to(`chat:${roomId}`).emit('message_read_receipt', {
+        messageId,
+        userId,
+        roomId,
+        timestamp: new Date()
+      });
+    });
+
+    socket.on('message_reaction', ({ roomId, messageId, emoji }) => {
+      socket.to(`chat:${roomId}`).emit('new_reaction', {
+        messageId,
+        userId,
+        emoji,
+        timestamp: new Date()
+      });
+    });
+
+    socket.on('voice_call_initiate', ({ roomId, callId, callType }) => {
+      socket.to(`chat:${roomId}`).emit('incoming_call', {
+        callId,
+        roomId,
+        callType,
+        initiatedBy: userId,
+        timestamp: new Date()
+      });
+      logger.info(`User ${userId} initiated ${callType} call in room ${roomId}`);
+    });
+
+    socket.on('voice_call_answer', ({ callId, roomId }) => {
+      socket.to(`chat:${roomId}`).emit('call_answered', {
+        callId,
+        userId,
+        timestamp: new Date()
+      });
+      logger.info(`User ${userId} answered call ${callId}`);
+    });
+
+    socket.on('voice_call_decline', ({ callId, roomId }) => {
+      socket.to(`chat:${roomId}`).emit('call_declined', {
+        callId,
+        userId,
+        timestamp: new Date()
+      });
+      logger.info(`User ${userId} declined call ${callId}`);
+    });
+
+    socket.on('voice_call_end', ({ callId, roomId }) => {
+      socket.to(`chat:${roomId}`).emit('call_ended', {
+        callId,
+        endedBy: userId,
+        timestamp: new Date()
+      });
+      logger.info(`User ${userId} ended call ${callId}`);
+    });
+
+    socket.on('webrtc_signal', ({ roomId, targetUserId, signal }) => {
+      io.to(`user:${targetUserId}`).emit('webrtc_signal', {
+        fromUserId: userId,
+        roomId,
+        signal
+      });
+    });
 
     socket.on('join_room', (roomId) => {
       socket.join(roomId);
@@ -100,13 +230,28 @@ function setupSocketIO(server) {
       logger.info(`User disconnected: ${userId}`);
       connectedUsers.delete(userId);
       userRooms.delete(userId);
+
+      if (companyId) {
+        io.to(`company:${companyId}`).emit('user_offline', {
+          userId,
+          timestamp: new Date()
+        });
+      }
     });
 
     socket.emit('connected', {
       message: 'Successfully connected to WebSocket server',
       userId,
-      socketId: socket.id
+      socketId: socket.id,
+      companyId
     });
+
+    if (companyId) {
+      socket.to(`company:${companyId}`).emit('user_online', {
+        userId,
+        timestamp: new Date()
+      });
+    }
   });
 
   return io;

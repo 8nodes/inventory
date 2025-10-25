@@ -10,6 +10,8 @@ const warehouseRoutes = require('./warehouseRoutes');
 const reservationRoutes = require('./reservationRoutes');
 const batchRoutes = require('./batchRoutes');
 const transferRoutes = require('./transferRoutes');
+const subscriptionRoutes = require('./subscriptionRoutes');
+const chatRoutes = require('./chatRoutes');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -28,7 +30,9 @@ router.get('/', (req, res) => {
             transfers: "/v1/transfers",
             batch: "/v1/batch",
             reports: "/v1/report",
-            inventoryAdjustment: "/v1/inventory-adjustment"
+            inventoryAdjustment: "/v1/inventory-adjustment",
+            subscriptions: "/v1/subscriptions",
+            chat: "/v1/chat"
         }
     })
 })
@@ -44,5 +48,7 @@ router.use('/v1/transfers', transferRoutes);
 router.use('/v1/batch', batchRoutes);
 router.use('/v1/report', reportRoutes);
 router.use('/v1/inventory-adjustment', inventoryAdjustmentRoutes);
+router.use('/v1/subscriptions', subscriptionRoutes);
+router.use('/v1/chat', chatRoutes);
 
 module.exports = router;
