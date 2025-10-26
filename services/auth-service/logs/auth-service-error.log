@@ -1,0 +1,1 @@
+{"level":"error","message":"Failed to start server: connect ECONNREFUSED 127.0.0.1:27017","service":"auth-service","timestamp":"2025-10-26 00:08:27"}

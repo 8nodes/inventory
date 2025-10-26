@@ -5,7 +5,7 @@ const { connectRabbitMQ, closeRabbitMQ } = require('./config/rabbitmq');
 const { startScheduler } = require('./services/messageScheduler');
 const app = require('./app');
 
-const PORT = process.env.PORT || 8008;
+const PORT = process.env.CHAT_SERVICE_PORT || 8008;
 
 const startServer = async () => {
   try {

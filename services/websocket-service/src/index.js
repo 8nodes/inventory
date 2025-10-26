@@ -8,7 +8,7 @@ const { handleOrderEvent, handlePaymentEvent } = require('./handlers/orderHandle
 const { handleInventoryEvent, handleLowStockAlert, handleStockTransfer } = require('./handlers/inventoryHandler');
 const { handleNotificationEvent, handleSystemAnnouncement } = require('./handlers/notificationHandler');
 
-const PORT = process.env.WEBSOCKET_SERVICE_PORT || 8009;
+const PORT = process.env.WEBSOCKET_SERVICE_PORT || 8011;
 const logger = createLogger('websocket-service');
 
 let io = null;
