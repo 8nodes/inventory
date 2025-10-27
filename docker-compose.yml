@@ -182,156 +182,6 @@ services:
       - "traefik.http.services.company.loadbalancer.server.port=8009"
 
   # --------------------------------
-  # Shop Service
-  # --------------------------------
-  shop-service:
-    build: ./services/shop-service
-    container_name: shop-service
-    restart: always
-    environment:
-      PORT: ${SHOP_SERVICE_PORT:-8003}
-      DB_MONGO: ${DB_MONGO}/shopdb?authSource=admin
-      RABBITMQ_URL: ${RABBITMQ_URL}
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    networks:
-      - ecommerce-network
-    volumes:
-      - ./services/shop-service:/app
-      - ./shared:/app/shared
-      - /app/node_modules
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.shop.rule=Host(`shop.localhost`)"
-      - "traefik.http.services.shop.loadbalancer.server.port=8003"
-
-  # --------------------------------
-  # Ecommerce Service
-  # --------------------------------
-  ecommerce-service:
-    build: ./services/ecommerce-service
-    container_name: ecommerce-service
-    restart: always
-    environment:
-      PORT: ${ECOMMERCE_SERVICE_PORT:-8004}
-      DB_MONGO: ${DB_MONGO}/ecommercedb?authSource=admin
-      RABBITMQ_URL: ${RABBITMQ_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - ecommerce-network
-    volumes:
-      - ./services/ecommerce-service:/app
-      - ./shared:/app/shared
-      - /app/node_modules
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ecommerce.rule=Host(`ecommerce.localhost`)"
-      - "traefik.http.services.ecommerce.loadbalancer.server.port=8004"
-
-  # --------------------------------
-  # Sales Service
-  # --------------------------------
-  sales-service:
-    build: ./services/sales-service
-    container_name: sales-service
-    restart: always
-    environment:
-      PORT: ${SALES_SERVICE_PORT:-8005}
-      DB_MONGO: ${DB_MONGO}/salesdb?authSource=admin
-      RABBITMQ_URL: ${RABBITMQ_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - ecommerce-network
-    volumes:
-      - ./services/sales-service:/app
-      - ./shared:/app/shared
-      - /app/node_modules
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sales.rule=Host(`sales.localhost`)"
-      - "traefik.http.services.sales.loadbalancer.server.port=8005"
-
-  # --------------------------------
-  # Payment Service
-  # --------------------------------
-  payment-service:
-    build: ./services/payment-service
-    container_name: payment-service
-    restart: always
-    environment:
-      PORT: ${PAYMENT_SERVICE_PORT:-8006}
-      DB_MONGO: ${DB_MONGO}/paymentdb?authSource=admin
-      RABBITMQ_URL: ${RABBITMQ_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
-      PAYPAL_SECRET: ${PAYPAL_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - ecommerce-network
-    volumes:
-      - ./services/payment-service:/app
-      - ./shared:/app/shared
-      - /app/node_modules
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.payment.rule=Host(`payment.localhost`)"
-      - "traefik.http.services.payment.loadbalancer.server.port=8006"
-
-  # --------------------------------
-  # Inventory Service
-  # --------------------------------
-  inventory-service:
-    build: ./services/inventory-service
-    container_name: inventory-service
-    restart: always
-    environment:
-      PORT: ${INVENTORY_SERVICE_PORT:-8007}
-      MONGODB_URI: ${DB_MONGO}/inventorydb?authSource=admin
-      RABBITMQ_URL: ${RABBITMQ_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      NODE_ENV: ${NODE_ENV}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - ecommerce-network
-    volumes:
-      - ./services/inventory-service:/app
-      - /app/node_modules
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.inventory.rule=Host(`inventory.localhost`)"
-      - "traefik.http.services.inventory.loadbalancer.server.port=8007"
-
-  # --------------------------------
   # Chat Service
   # --------------------------------
   chat-service:
@@ -339,8 +189,8 @@ services:
     container_name: chat-service
     restart: always
     environment:
-      PORT: ${CHAT_SERVICE_PORT:-8008}
-      MONGODB_URI: ${DB_MONGO}/chatdb?authSource=admin
+      PORT: 3003
+      MONGO_URI: ${DB_MONGO}
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
@@ -357,7 +207,91 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.chat.rule=Host(`chat.localhost`)"
-      - "traefik.http.services.chat.loadbalancer.server.port=8008"
+      - "traefik.http.services.chat.loadbalancer.server.port=3003"
+
+  # --------------------------------
+  # Ecommerce Service
+  # --------------------------------
+  ecommerce-service:
+    build: ./services/ecommerce-service
+    container_name: ecommerce-service
+    restart: always
+    environment:
+      PORT: 3004
+      MONGO_URI: ${DB_MONGO}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/ecommerce-service:/app
+      - /app/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ecommerce.rule=Host(`ecommerce.localhost`)"
+      - "traefik.http.services.ecommerce.loadbalancer.server.port=3004"
+
+  # --------------------------------
+  # Sales Service
+  # --------------------------------
+  sales-service:
+    build: ./services/sales-service
+    container_name: sales-service
+    restart: always
+    environment:
+      PORT: 3005
+      MONGO_URI: ${DB_MONGO}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/sales-service:/app
+      - /app/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sales.rule=Host(`sales.localhost`)"
+      - "traefik.http.services.sales.loadbalancer.server.port=3005"
+
+  # --------------------------------
+  # Inventory Service
+  # --------------------------------
+  inventory-service:
+    build: ./services/inventory-service
+    container_name: inventory-service
+    restart: always
+    environment:
+      PORT: 3006
+      MONGO_URI: ${DB_MONGO}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./services/inventory-service:/app
+      - /app/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.inventory.rule=Host(`inventory.localhost`)"
+      - "traefik.http.services.inventory.loadbalancer.server.port=3006"
 
   # --------------------------------
   # Notification Service
@@ -367,26 +301,20 @@ services:
     container_name: notification-service
     restart: always
     environment:
-      PORT: ${NOTIFICATION_SERVICE_PORT:-8009}
-      DB_MONGO: ${DB_MONGO}/notificationdb?authSource=admin
+      PORT: 3007
+      MONGO_URI: ${DB_MONGO}
       RABBITMQ_URL: ${RABBITMQ_URL}
-      REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
-      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
       NODE_ENV: ${NODE_ENV}
     depends_on:
       mongodb:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - ecommerce-network
     volumes:
@@ -395,35 +323,35 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.notification.rule=Host(`notify.localhost`)"
-      - "traefik.http.services.notification.loadbalancer.server.port=8010"
+      - "traefik.http.services.notification.loadbalancer.server.port=3007"
 
   # --------------------------------
-  # WebSocket Service
+  # Shop Service
   # --------------------------------
-  websocket-service:
-    build: ./services/websocket-service
-    container_name: websocket-service
+  shop-service:
+    build: ./services/shop-service
+    container_name: shop-service
     restart: always
     environment:
-      PORT: ${WEBSOCKET_SERVICE_PORT:-8011}
+      PORT: 3008
+      MONGO_URI: ${DB_MONGO}
       RABBITMQ_URL: ${RABBITMQ_URL}
-      REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
     depends_on:
+      mongodb:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - ecommerce-network
     volumes:
-      - ./services/websocket-service:/app
+      - ./services/shop-service:/app
       - /app/node_modules
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.websocket.rule=Host(`ws.localhost`)"
-      - "traefik.http.services.websocket.loadbalancer.server.port=8011"
+      - "traefik.http.routers.shop.rule=Host(`shop.localhost`)"
+      - "traefik.http.services.shop.loadbalancer.server.port=3008"
 
   # --------------------------------
   # Audit Service
@@ -433,8 +361,8 @@ services:
     container_name: audit-service
     restart: always
     environment:
-      PORT: ${AUDIT_SERVICE_PORT:-8012}
-      DB_MONGO: ${DB_MONGO}/auditdb?authSource=admin
+      PORT: 3009
+      MONGO_URI: ${DB_MONGO}
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
@@ -451,7 +379,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.audit.rule=Host(`audit.localhost`)"
-      - "traefik.http.services.audit.loadbalancer.server.port=8012"
+      - "traefik.http.services.audit.loadbalancer.server.port=3009"
 
   # --------------------------------
   # Analytics Service
@@ -461,8 +389,8 @@ services:
     container_name: analytics-service
     restart: always
     environment:
-      PORT: ${ANALYTICS_SERVICE_PORT:-8013}
-      DB_MONGO: ${DB_MONGO}/analyticsdb?authSource=admin
+      PORT: 3010
+      MONGO_URI: ${DB_MONGO}
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
@@ -479,35 +407,32 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.analytics.rule=Host(`analytics.localhost`)"
-      - "traefik.http.services.analytics.loadbalancer.server.port=8013"
+      - "traefik.http.services.analytics.loadbalancer.server.port=3010"
 
   # --------------------------------
-  # Debt Service
+  # WebSocket Service
   # --------------------------------
-  debt-service:
-    build: ./services/debt-service
-    container_name: debt-service
+  websocket-service:
+    build: ./services/websocket-service
+    container_name: websocket-service
     restart: always
     environment:
-      PORT: ${DEBT_SERVICE_PORT:-8014}
-      DB_MONGO: ${DB_MONGO}/debtdb?authSource=admin
+      PORT: 3011
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
     depends_on:
-      mongodb:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:
       - ecommerce-network
     volumes:
-      - ./services/debt-service:/app
+      - ./services/websocket-service:/app
       - /app/node_modules
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.debt.rule=Host(`debt.localhost`)"
-      - "traefik.http.services.debt.loadbalancer.server.port=8014"
+      - "traefik.http.routers.websocket.rule=Host(`ws.localhost`)"
+      - "traefik.http.services.websocket.loadbalancer.server.port=3011"
 
 volumes:
   mongodb_data:
