@@ -53,6 +53,16 @@ const SERVICES = {
     name: 'websocket-service',
     url: process.env.WEBSOCKET_SERVICE_URL || 'http://localhost:3011',
     healthCheck: '/health'
+  },
+  PAYMENT: {
+    name: 'payment-service',
+    url: process.env.PAYMENT_SERVICE_URL || 'http://localhost:3012',
+    healthCheck: '/health'
+  },
+  DEBT: {
+    name: 'debt-service',
+    url: process.env.DEBT_SERVICE_URL || 'http://localhost:3013',
+    healthCheck: '/health'
   }
 };
 

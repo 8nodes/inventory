@@ -117,14 +117,6 @@ app.use('/api/orders', authMiddleware, apiLimiter, createProxyMiddleware({
   }
 }));
 
-app.use('/api/payments', authMiddleware, apiLimiter, createProxyMiddleware({
-  target: SERVICES.PAYMENT.url,
-  changeOrigin: true,
-  pathRewrite: {
-    '^/api/payments': '/payments'
-  }
-}));
-
 app.use('/api/inventory', authMiddleware, apiLimiter, createProxyMiddleware({
   target: SERVICES.INVENTORY.url,
   changeOrigin: true,
@@ -178,6 +170,46 @@ app.use('/api/reports', authMiddleware, apiLimiter, createProxyMiddleware({
   changeOrigin: true,
   pathRewrite: {
     '^/api/reports': '/api/reports'
+  }
+}));
+
+app.use('/api/payments', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.PAYMENT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/payments': '/api/payments'
+  }
+}));
+
+app.use('/api/wallets', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.PAYMENT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/wallets': '/api/wallets'
+  }
+}));
+
+app.use('/api/debts', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.DEBT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/debts': '/api/debts'
+  }
+}));
+
+app.use('/api/checkout', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.ECOMMERCE.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/checkout': '/api/checkout'
+  }
+}));
+
+app.use('/api/subscriptions', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.COMPANY.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/subscriptions': '/api/subscriptions'
   }
 }));
 
