@@ -9,54 +9,49 @@ const SERVICES = {
     url: process.env.COMPANY_SERVICE_URL || 'http://localhost:8002',
     healthCheck: '/health'
   },
-  SHOP: {
-    name: 'shop-service',
-    url: process.env.SHOP_SERVICE_URL || 'http://localhost:8003',
+  CHAT: {
+    name: 'chat-service',
+    url: process.env.CHAT_SERVICE_URL || 'http://localhost:3003',
     healthCheck: '/health'
   },
   ECOMMERCE: {
     name: 'ecommerce-service',
-    url: process.env.ECOMMERCE_SERVICE_URL || 'http://localhost:8004',
+    url: process.env.ECOMMERCE_SERVICE_URL || 'http://localhost:3004',
     healthCheck: '/health'
   },
   SALES: {
     name: 'sales-service',
-    url: process.env.SALES_SERVICE_URL || 'http://localhost:8005',
-    healthCheck: '/health'
-  },
-  PAYMENT: {
-    name: 'payment-service',
-    url: process.env.PAYMENT_SERVICE_URL || 'http://localhost:8006',
+    url: process.env.SALES_SERVICE_URL || 'http://localhost:3005',
     healthCheck: '/health'
   },
   INVENTORY: {
     name: 'inventory-service',
-    url: process.env.INVENTORY_SERVICE_URL || 'http://localhost:8007',
+    url: process.env.INVENTORY_SERVICE_URL || 'http://localhost:3006',
     healthCheck: '/health'
   },
   NOTIFICATION: {
     name: 'notification-service',
-    url: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:8008',
+    url: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3007',
     healthCheck: '/health'
   },
-  WEBSOCKET: {
-    name: 'websocket-service',
-    url: process.env.WEBSOCKET_SERVICE_URL || 'http://localhost:8009',
+  SHOP: {
+    name: 'shop-service',
+    url: process.env.SHOP_SERVICE_URL || 'http://localhost:3008',
     healthCheck: '/health'
   },
   AUDIT: {
     name: 'audit-service',
-    url: process.env.AUDIT_SERVICE_URL || 'http://localhost:8010',
+    url: process.env.AUDIT_SERVICE_URL || 'http://localhost:3009',
     healthCheck: '/health'
   },
   ANALYTICS: {
     name: 'analytics-service',
-    url: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:8011',
+    url: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010',
     healthCheck: '/health'
   },
-  DEBT: {
-    name: 'debt-service',
-    url: process.env.DEBT_SERVICE_URL || 'http://localhost:8012',
+  WEBSOCKET: {
+    name: 'websocket-service',
+    url: process.env.WEBSOCKET_SERVICE_URL || 'http://localhost:3011',
     healthCheck: '/health'
   }
 };

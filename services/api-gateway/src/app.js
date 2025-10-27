@@ -37,11 +37,43 @@ app.use('/api/companies', authMiddleware, apiLimiter, createProxyMiddleware({
   }
 }));
 
+app.use('/api/chat', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.CHAT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/chat': '/api'
+  }
+}));
+
 app.use('/api/shops', authMiddleware, apiLimiter, createProxyMiddleware({
   target: SERVICES.SHOP.url,
   changeOrigin: true,
   pathRewrite: {
-    '^/api/shops': '/shops'
+    '^/api/shops': '/api/shops'
+  }
+}));
+
+app.use('/api/shop-products', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.SHOP.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/shop-products': '/api/shop-products'
+  }
+}));
+
+app.use('/api/shop-categories', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.SHOP.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/shop-categories': '/api/categories'
+  }
+}));
+
+app.use('/api/shop-reviews', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.SHOP.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/shop-reviews': '/api/reviews'
   }
 }));
 
@@ -113,7 +145,23 @@ app.use('/api/audit', authMiddleware, apiLimiter, createProxyMiddleware({
   target: SERVICES.AUDIT.url,
   changeOrigin: true,
   pathRewrite: {
-    '^/api/audit': '/audit'
+    '^/api/audit': '/api/audit'
+  }
+}));
+
+app.use('/api/security', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.AUDIT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/security': '/api/security'
+  }
+}));
+
+app.use('/api/compliance', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.AUDIT.url,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/compliance': '/api/compliance'
   }
 }));
 
@@ -121,15 +169,15 @@ app.use('/api/analytics', authMiddleware, apiLimiter, createProxyMiddleware({
   target: SERVICES.ANALYTICS.url,
   changeOrigin: true,
   pathRewrite: {
-    '^/api/analytics': '/analytics'
+    '^/api/analytics': '/api/analytics'
   }
 }));
 
-app.use('/api/debts', authMiddleware, apiLimiter, createProxyMiddleware({
-  target: SERVICES.DEBT.url,
+app.use('/api/reports', authMiddleware, apiLimiter, createProxyMiddleware({
+  target: SERVICES.ANALYTICS.url,
   changeOrigin: true,
   pathRewrite: {
-    '^/api/debts': '/debts'
+    '^/api/reports': '/api/reports'
   }
 }));
 
